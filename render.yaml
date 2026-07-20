@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: kc-floating-chatbot
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DRY_RUN
+        value: "true"
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: BUBBLE_API_URL
+        sync: false
+      - key: BUBBLE_API_TOKEN
+        sync: false

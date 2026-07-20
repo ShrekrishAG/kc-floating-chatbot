@@ -1,0 +1,67 @@
+{
+  "categories": [
+    {
+      "id": "account",
+      "label": "Account & Login",
+      "problems": [
+        {
+          "id": "reset-password",
+          "label": "I forgot my password",
+          "answer": "On the login screen, tap \"Forgot password\" and enter the email linked to your account. Check your inbox (and spam folder) for a reset link. The link expires after 24 hours — request a new one if needed."
+        },
+        {
+          "id": "change-email",
+          "label": "How do I change my email?",
+          "answer": "Go to Settings → Account → Email, enter your new address, and confirm via the verification email we send. Until you verify, your old email remains active for login."
+        },
+        {
+          "id": "delete-account",
+          "label": "How do I delete my account?",
+          "answer": "Go to Settings → Account → Delete account. Confirm the prompt — this permanently removes your profile and data and cannot be undone. If you cannot access Settings, submit an issue report and our support team will help."
+        }
+      ]
+    },
+    {
+      "id": "billing",
+      "label": "Billing & Payments",
+      "problems": [
+        {
+          "id": "refund",
+          "label": "How do I get a refund?",
+          "answer": "Go to Settings → Billing → Request refund and select the charge. Refunds for eligible purchases usually appear on your statement within 5–10 business days. Contact support via an issue report if the charge is older than 30 days."
+        },
+        {
+          "id": "update-payment",
+          "label": "Update my payment method",
+          "answer": "Open Settings → Billing → Payment methods. Add a new card or select an existing one as default. Your next renewal will use the updated method."
+        },
+        {
+          "id": "cancel-subscription",
+          "label": "Cancel my subscription",
+          "answer": "Go to Settings → Billing → Subscription → Cancel. You keep access until the end of the current billing period. You can resubscribe anytime from the same screen."
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "label": "Using the App",
+      "problems": [
+        {
+          "id": "notifications",
+          "label": "I’m not receiving notifications",
+          "answer": "Check that notifications are enabled in Settings → Notifications and in your device system settings for this app. If you recently reinstalled, open the app once and allow notifications when prompted."
+        },
+        {
+          "id": "slow-loading",
+          "label": "The app is loading slowly",
+          "answer": "Try a stable Wi‑Fi or cellular connection, force-close and reopen the app, then clear the app cache if available on your device. If the issue continues on a good connection, submit an issue report with your device model and OS version."
+        },
+        {
+          "id": "feature-help",
+          "label": "How do I use a specific feature?",
+          "answer": "Open Help → Guides in the app for step-by-step walkthroughs. If you cannot find the feature you need, choose “My problem isn’t listed” and submit an issue report with what you were trying to do."
+        }
+      ]
+    }
+  ]
+}

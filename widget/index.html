@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KC Chatbot — local preview</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, sans-serif;
+        background: linear-gradient(160deg, #e8eef5 0%, #f7f4ef 100%);
+      }
+      .demo {
+        padding: 2rem;
+        max-width: 40rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo">
+      <h1>Widget preview</h1>
+      <p>Open the chat bubble in the bottom-right corner.</p>
+    </div>
+    <script type="module">
+      import { mountKCChatbot } from "/src/main.js";
+      mountKCChatbot({
+        apiBaseUrl: "",
+        title: "Help Center",
+        primaryColor: "#1a5f4a",
+      });
+    </script>
+  </body>
+</html>

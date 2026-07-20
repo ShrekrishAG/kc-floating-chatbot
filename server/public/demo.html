@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KC Chatbot demo</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: linear-gradient(160deg, #dfe8e3 0%, #f6f1ea 55%, #eef2f7 100%);
+        color: #1a2421;
+      }
+      main {
+        max-width: 36rem;
+        padding: 2.5rem 1.5rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        margin: 0 0 0.5rem;
+      }
+      p {
+        color: #5c6b66;
+        line-height: 1.5;
+      }
+      code {
+        background: #fff;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>KC Help Chatbot</h1>
+      <p>
+        This page loads the production widget from <code>/widget.js</code>.
+        Use the green button in the corner to try the knowledge-base flow and
+        issue reports (dry-run unless Bubble env vars are set).
+      </p>
+    </main>
+    <script
+      src="/widget.js"
+      data-kc-chatbot
+      data-api-url=""
+      data-title="Help Center"
+      data-primary-color="#1a5f4a"
+      defer
+    ></script>
+  </body>
+</html>
