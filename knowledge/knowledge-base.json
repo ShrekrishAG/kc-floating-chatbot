@@ -22,27 +22,6 @@
       ]
     },
     {
-      "id": "billing",
-      "label": "Billing & Payments",
-      "problems": [
-        {
-          "id": "refund",
-          "label": "How do I get a refund?",
-          "answer": "Go to Settings → Billing → Request refund and select the charge. Refunds for eligible purchases usually appear on your statement within 5–10 business days. Contact support via an issue report if the charge is older than 30 days."
-        },
-        {
-          "id": "update-payment",
-          "label": "Update my payment method",
-          "answer": "Open Settings → Billing → Payment methods. Add a new card or select an existing one as default. Your next renewal will use the updated method."
-        },
-        {
-          "id": "cancel-subscription",
-          "label": "Cancel my subscription",
-          "answer": "Go to Settings → Billing → Subscription → Cancel. You keep access until the end of the current billing period. You can resubscribe anytime from the same screen."
-        }
-      ]
-    },
-    {
       "id": "app",
       "label": "Using the App",
       "problems": [
