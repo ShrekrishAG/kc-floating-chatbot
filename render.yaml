@@ -5,6 +5,9 @@ services:
     plan: free
     buildCommand: npm install && npm run build
     startCommand: npm start
+    # In Render Dashboard → your service → Settings → Build & Deploy:
+    #   Build Command: npm install && npm run build
+    #   Start Command: npm start
     envVars:
       - key: NODE_ENV
         value: production
