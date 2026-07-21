@@ -48,6 +48,7 @@ app.get("/api/kb", (_req, res) => {
       problems: cat.problems.map((p) => ({
         id: p.id,
         label: p.label,
+        requireReport: Boolean(p.requireReport),
       })),
     }));
     res.json({ categories });

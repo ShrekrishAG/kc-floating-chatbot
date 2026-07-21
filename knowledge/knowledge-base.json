@@ -12,12 +12,12 @@
         {
           "id": "change-email",
           "label": "How do I change my email?",
-          "answer": "Go to Settings → Account → Email, enter your new address, and confirm via the verification email we send. Until you verify, your old email remains active for login."
+          "answer": "Go to Profile(top left corner) → Edit → Edit email and password, enter your new address, and confirm via the verification email we send."
         },
         {
           "id": "delete-account",
           "label": "How do I delete my account?",
-          "answer": "Go to Settings → Account → Delete account. Confirm the prompt — this permanently removes your profile and data and cannot be undone. If you cannot access Settings, submit an issue report and our support team will help."
+          "answer": "Go to Profile(top left corner) → Edit → Delete account — this permanently removes your profile and data and cannot be undone. If you cannot access Settings, submit an issue report and our support team will help."
         }
       ]
     },
@@ -47,19 +47,56 @@
       "label": "Using the App",
       "problems": [
         {
-          "id": "notifications",
-          "label": "I’m not receiving notifications",
+          "id": "email-notifications",
+          "label": "I’m not receiving email notifications",
           "answer": "Check that notifications are enabled in Settings → Notifications and in your device system settings for this app. If you recently reinstalled, open the app once and allow notifications when prompted."
         },
         {
-          "id": "slow-loading",
-          "label": "The app is loading slowly",
-          "answer": "Try a stable Wi‑Fi or cellular connection, force-close and reopen the app, then clear the app cache if available on your device. If the issue continues on a good connection, submit an issue report with your device model and OS version."
+          "id": "screenshot-upload",
+          "label": "Cannot upload screenshots",
+          "answer": "Check that you have enabled the permission to access your device's storage in device settings. Try a stable Wi‑Fi or cellular connection, force-close and reopen the app, then clear the app cache if available on your device. If the issue continues on a good connection, submit an issue report with your device model and OS version."
         },
         {
-          "id": "feature-help",
-          "label": "How do I use a specific feature?",
-          "answer": "Open Help → Guides in the app for step-by-step walkthroughs. If you cannot find the feature you need, choose “My problem isn’t listed” and submit an issue report with what you were trying to do."
+          "id": "start-lesson",
+          "label": "Cannot start a new lesson / My Start next lesson button is disabled",
+          "answer": "Please leave us an issue report with details like current lesson, device model, and OS version.",
+          "requireReport": true
+        }
+      ]
+    },
+    {
+      "id": "meetings-lessons",
+      "label": "Meetings & Lessons",
+      "problems": [
+        {
+          "id": "start-meeting",
+          "label": "Cannot start a meeting / Start meeting isn’t working",
+          "answer": "This usually needs our support team. Please describe what happens when you try to start the meeting (and include device model and OS version).",
+          "requireReport": true
+        },
+        {
+          "id": "meeting-not-unlocked",
+          "label": "Meeting is not unlocked",
+          "answer": "If a meeting should be unlocked but isn’t, our support team needs to check your account. Please describe which meeting and what you see on screen.",
+          "requireReport": true
+        },
+        {
+          "id": "lesson-not-unlocked",
+          "label": "Lesson is not unlocked",
+          "answer": "If a lesson should be unlocked but isn’t, our support team needs to check your account. Please describe which lesson and what you see on screen.",
+          "requireReport": true
+        },
+        {
+          "id": "false-lesson-in-progress",
+          "label": "I don’t have a lesson in progress, but the app shows one",
+          "answer": "This status glitch needs a support ticket. Please describe what the app shows versus what you expect (include screenshots details if you can).",
+          "requireReport": true
+        },
+        {
+          "id": "false-meeting-in-progress",
+          "label": "I don’t have a meeting in progress, but the app shows one",
+          "answer": "This status glitch needs a support ticket. Please describe what the app shows versus what you expect (include screenshots details if you can).",
+          "requireReport": true
         }
       ]
     }

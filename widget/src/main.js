@@ -246,7 +246,9 @@ export function mountKCChatbot(config = {}) {
       case "form":
         appendBot(
           body,
-          "Describe the issue and we’ll send it to support. Fields marked * are required."
+          selectedProblem?.requireReport
+            ? "Please describe the problem below and submit an issue report for our support team."
+            : "Describe the issue and we’ll send it to support. Fields marked * are required."
         );
         body.appendChild(buildForm());
         break;
@@ -364,7 +366,7 @@ export function mountKCChatbot(config = {}) {
   }
 
   /**
-   * @param {{ id: string, label: string }} problem
+   * @param {{ id: string, label: string, requireReport?: boolean }} problem
    */
   async function selectProblem(problem) {
     busy = true;
@@ -378,7 +380,8 @@ export function mountKCChatbot(config = {}) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to load answer");
       selectedProblem = json;
-      screen = "answer";
+      // Problems that always need support skip the FAQ answer and open the report form
+      screen = json.requireReport ? "form" : "answer";
     } catch (err) {
       errorMsg =
         err instanceof Error ? err.message : "Failed to load answer.";

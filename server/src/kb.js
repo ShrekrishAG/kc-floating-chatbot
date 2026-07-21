@@ -30,6 +30,7 @@ export function getProblemById(kbPath, problemId) {
         id: problem.id,
         label: problem.label,
         answer: problem.answer,
+        requireReport: Boolean(problem.requireReport),
         categoryId: category.id,
         categoryLabel: category.label,
       };
