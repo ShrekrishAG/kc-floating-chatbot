@@ -17,6 +17,8 @@ services:
         value: techsupport@kingdomcitizen.app
       - key: EMAIL_FROM
         sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: SMTP_HOST

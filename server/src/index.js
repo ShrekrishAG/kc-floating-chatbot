@@ -112,7 +112,7 @@ app.post("/api/issues", async (req, res) => {
       result.email = await sendSupportEmail(payload);
     } else {
       throw new Error(
-        "Email is not configured. Add RESEND_API_KEY or SMTP_* env vars on Render, and set DRY_RUN=false."
+        "Email is not configured. Add SENDGRID_API_KEY (or SMTP_*/RESEND) on Render, and set DRY_RUN=false."
       );
     }
 
