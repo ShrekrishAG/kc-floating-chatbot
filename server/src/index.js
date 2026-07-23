@@ -6,6 +6,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { loadKnowledgeBase, getProblemById } from "./kb.js";
 import { submitIssueToBubble } from "./bubble.js";
+import { sendSupportEmail, isEmailConfigured } from "./email.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "../..");
@@ -104,11 +105,27 @@ app.post("/api/issues", async (req, res) => {
       submittedAt: new Date().toISOString(),
     };
 
-    const result = await submitIssueToBubble(payload);
+    const result = { email: null, bubble: null };
+    const dryRun = process.env.DRY_RUN === "true";
+
+    if (dryRun || isEmailConfigured()) {
+      result.email = await sendSupportEmail(payload);
+    } else {
+      throw new Error(
+        "Email is not configured. Add RESEND_API_KEY or SMTP_* env vars on Render, and set DRY_RUN=false."
+      );
+    }
+
+    if (process.env.BUBBLE_API_URL && !dryRun) {
+      result.bubble = await submitIssueToBubble(payload);
+    }
+
     res.status(201).json({
       ok: true,
-      message: "Issue report submitted",
-      bubble: result,
+      message: dryRun
+        ? "Issue report logged (dry run — email not sent)"
+        : "Issue report submitted",
+      ...result,
     });
   } catch (err) {
     console.error("POST /api/issues failed:", err);

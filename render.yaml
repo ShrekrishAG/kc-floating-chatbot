@@ -13,6 +13,20 @@ services:
         value: production
       - key: DRY_RUN
         value: "true"
+      - key: SUPPORT_TO_EMAIL
+        value: techsupport@kingdomcitizen.app
+      - key: EMAIL_FROM
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
       - key: CORS_ORIGINS
         value: "*"
       - key: BUBBLE_API_URL
