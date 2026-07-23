@@ -251,6 +251,21 @@
   resize: vertical;
 }
 
+.kc-form input[type="file"] {
+  padding: 6px 0;
+  border: none;
+  font-size: 0.82rem;
+}
+
+.kc-field-hint {
+  font-weight: 500;
+  color: var(--kc-muted);
+}
+
+.kc-file-hint {
+  margin: -4px 0 0;
+}
+
 .kc-form input:focus,
 .kc-form textarea:focus {
   outline: 2px solid color-mix(in srgb, var(--kc-primary) 35%, white);

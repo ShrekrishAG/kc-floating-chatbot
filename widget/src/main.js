@@ -291,6 +291,10 @@ export function mountKCChatbot(config = {}) {
       <label>Email ${defaultEmail ? "" : "*"}
         <input name="userEmail" type="email" ${defaultEmail ? "" : "required"} maxlength="200" placeholder="you@example.com" value="${escapeAttr(defaultEmail)}" />
       </label>
+      <label>Screenshots <span class="kc-field-hint">(optional, up to 3 images)</span>
+        <input name="images" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple />
+      </label>
+      <p class="kc-muted kc-file-hint">JPEG, PNG, WebP, or GIF — max 5 MB each.</p>
       <div class="kc-actions"></div>
     `;
 
@@ -321,6 +325,11 @@ export function mountKCChatbot(config = {}) {
       const summary = String(data.get("summary") || "").trim();
       const details = String(data.get("details") || "").trim();
       const userEmail = String(data.get("userEmail") || "").trim();
+      const imageInput = form.querySelector('input[name="images"]');
+      const files =
+        imageInput instanceof HTMLInputElement && imageInput.files
+          ? Array.from(imageInput.files)
+          : [];
 
       if (!summary) {
         errorMsg = "Please enter a summary.";
@@ -328,22 +337,53 @@ export function mountKCChatbot(config = {}) {
         return;
       }
 
+      if (files.length > 3) {
+        errorMsg = "You can attach up to 3 images.";
+        render();
+        return;
+      }
+
+      const allowed = new Set([
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+      ]);
+      for (const file of files) {
+        if (!allowed.has(file.type)) {
+          errorMsg = "Only JPEG, PNG, WebP, or GIF images are allowed.";
+          render();
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          errorMsg = "Each image must be 5 MB or smaller.";
+          render();
+          return;
+        }
+      }
+
       busy = true;
       errorMsg = "";
       render();
 
       try {
+        const body = new FormData();
+        body.append("summary", summary);
+        body.append("details", details);
+        body.append("userEmail", userEmail);
+        body.append(
+          "pageUrl",
+          typeof location !== "undefined" ? location.href : ""
+        );
+        body.append("problemId", selectedProblem?.id || "");
+        body.append("problemLabel", selectedProblem?.label || "");
+        for (const file of files) {
+          body.append("images", file, file.name);
+        }
+
         const res = await fetch(`${apiBaseUrl}/api/issues`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            summary,
-            details,
-            userEmail,
-            pageUrl: typeof location !== "undefined" ? location.href : "",
-            problemId: selectedProblem?.id || "",
-            problemLabel: selectedProblem?.label || "",
-          }),
+          body,
         });
         const json = await res.json().catch(() => ({}));
         if (!res.ok) {

@@ -1,32 +1,22 @@
 /**
- * Sends issue reports by email.
+ * Sends issue reports by email (optional image attachments).
  *
- * Option A — SendGrid API:
- *   SENDGRID_API_KEY=SG.xxx
- *   EMAIL_FROM=KC Chatbot <noreply@kingdomcitizen.app>  // verified sender/domain
- *   SUPPORT_TO_EMAIL=techsupport@kingdomcitizen.app
+ * Attachments shape: [{ filename, contentType, content: Buffer }]
  *
- * Option B — Resend:
- *   RESEND_API_KEY=re_xxx
- *   EMAIL_FROM=...
- *   SUPPORT_TO_EMAIL=techsupport@kingdomcitizen.app
- *
- * Option C — SMTP (SendGrid: smtp.sendgrid.net, user=apikey, pass=API key):
- *   SMTP_HOST=smtp.sendgrid.net
- *   SMTP_PORT=587
- *   SMTP_USER=apikey
- *   SMTP_PASS=<SendGrid API key>
- *   EMAIL_FROM=...
- *   SUPPORT_TO_EMAIL=techsupport@kingdomcitizen.app
- *
+ * Env: SENDGRID_API_KEY | RESEND_API_KEY | SMTP_* + EMAIL_FROM, SUPPORT_TO_EMAIL
  * DRY_RUN=true logs instead of sending.
  */
 
 /**
- * @param {object} payload
- * @returns {Promise<{ dryRun?: boolean, provider?: string, id?: string, to?: string }>}
+ * @typedef {{ filename: string, contentType: string, content: Buffer }} EmailAttachment
  */
-export async function sendSupportEmail(payload) {
+
+/**
+ * @param {object} payload
+ * @param {EmailAttachment[]} [attachments]
+ * @returns {Promise<{ dryRun?: boolean, provider?: string, id?: string, to?: string, attachmentCount?: number }>}
+ */
+export async function sendSupportEmail(payload, attachments = []) {
   const to =
     process.env.SUPPORT_TO_EMAIL || "techsupport@kingdomcitizen.app";
   const from =
@@ -35,6 +25,7 @@ export async function sendSupportEmail(payload) {
     "noreply@kingdomcitizen.app";
   const replyTo = payload.userEmail || undefined;
   const dryRun = process.env.DRY_RUN === "true";
+  const files = Array.isArray(attachments) ? attachments : [];
 
   const subject = `[KC Support] ${payload.summary}`.slice(0, 200);
   const text = [
@@ -46,6 +37,7 @@ export async function sendSupportEmail(payload) {
     `Problem: ${payload.problemLabel || "(none)"} (${payload.problemId || "n/a"})`,
     `Page URL: ${payload.pageUrl || "(none)"}`,
     `Submitted at: ${payload.submittedAt}`,
+    `Attachments: ${files.length ? files.map((f) => f.filename).join(", ") : "(none)"}`,
   ].join("\n");
 
   if (dryRun) {
@@ -55,20 +47,27 @@ export async function sendSupportEmail(payload) {
       replyTo,
       subject,
       text,
+      attachments: files.map((f) => ({
+        filename: f.filename,
+        contentType: f.contentType,
+        bytes: f.content?.length || 0,
+      })),
     });
-    return { dryRun: true, to, subject };
+    return { dryRun: true, to, subject, attachmentCount: files.length };
   }
 
+  const mailOpts = { to, from, subject, text, replyTo, attachments: files };
+
   if (process.env.SENDGRID_API_KEY) {
-    return sendViaSendGrid({ to, from, subject, text, replyTo });
+    return sendViaSendGrid(mailOpts);
   }
 
   if (process.env.RESEND_API_KEY) {
-    return sendViaResend({ to, from, subject, text, replyTo });
+    return sendViaResend(mailOpts);
   }
 
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return sendViaSmtp({ to, from, subject, text, replyTo });
+    return sendViaSmtp(mailOpts);
   }
 
   throw new Error(
@@ -99,7 +98,7 @@ function parseFrom(from) {
 }
 
 /**
- * @param {{ to: string, from: string, subject: string, text: string, replyTo?: string }} opts
+ * @param {{ to: string, from: string, subject: string, text: string, replyTo?: string, attachments?: EmailAttachment[] }} opts
  */
 async function sendViaSendGrid(opts) {
   const from = parseFrom(opts.from);
@@ -113,6 +112,15 @@ async function sendViaSendGrid(opts) {
 
   if (opts.replyTo) {
     body.reply_to = { email: opts.replyTo };
+  }
+
+  if (opts.attachments?.length) {
+    body.attachments = opts.attachments.map((file) => ({
+      content: Buffer.from(file.content).toString("base64"),
+      filename: file.filename,
+      type: file.contentType,
+      disposition: "attachment",
+    }));
   }
 
   const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
@@ -130,26 +138,41 @@ async function sendViaSendGrid(opts) {
   }
 
   const messageId = response.headers.get("x-message-id") || undefined;
-  return { provider: "sendgrid", id: messageId, to: opts.to };
+  return {
+    provider: "sendgrid",
+    id: messageId,
+    to: opts.to,
+    attachmentCount: opts.attachments?.length || 0,
+  };
 }
 
 /**
- * @param {{ to: string, from: string, subject: string, text: string, replyTo?: string }} opts
+ * @param {{ to: string, from: string, subject: string, text: string, replyTo?: string, attachments?: EmailAttachment[] }} opts
  */
 async function sendViaResend(opts) {
+  /** @type {Record<string, unknown>} */
+  const payload = {
+    from: opts.from,
+    to: [opts.to],
+    subject: opts.subject,
+    text: opts.text,
+    ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
+  };
+
+  if (opts.attachments?.length) {
+    payload.attachments = opts.attachments.map((file) => ({
+      filename: file.filename,
+      content: Buffer.from(file.content).toString("base64"),
+    }));
+  }
+
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: opts.from,
-      to: [opts.to],
-      subject: opts.subject,
-      text: opts.text,
-      ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
-    }),
+    body: JSON.stringify(payload),
   });
 
   const body = await response.json().catch(() => ({}));
@@ -158,11 +181,16 @@ async function sendViaResend(opts) {
       `Resend failed (${response.status}): ${JSON.stringify(body)}`
     );
   }
-  return { provider: "resend", id: body.id, to: opts.to };
+  return {
+    provider: "resend",
+    id: body.id,
+    to: opts.to,
+    attachmentCount: opts.attachments?.length || 0,
+  };
 }
 
 /**
- * @param {{ to: string, from: string, subject: string, text: string, replyTo?: string }} opts
+ * @param {{ to: string, from: string, subject: string, text: string, replyTo?: string, attachments?: EmailAttachment[] }} opts
  */
 async function sendViaSmtp(opts) {
   const nodemailer = await import("nodemailer");
@@ -185,7 +213,17 @@ async function sendViaSmtp(opts) {
     subject: opts.subject,
     text: opts.text,
     ...(opts.replyTo ? { replyTo: opts.replyTo } : {}),
+    attachments: (opts.attachments || []).map((file) => ({
+      filename: file.filename,
+      content: file.content,
+      contentType: file.contentType,
+    })),
   });
 
-  return { provider: "smtp", id: info.messageId, to: opts.to };
+  return {
+    provider: "smtp",
+    id: info.messageId,
+    to: opts.to,
+    attachmentCount: opts.attachments?.length || 0,
+  };
 }
