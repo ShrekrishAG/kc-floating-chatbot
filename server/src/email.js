@@ -1,17 +1,22 @@
 /**
  * Sends issue reports by email.
  *
- * Option A — Resend (https://resend.com):
- *   RESEND_API_KEY=re_xxx
- *   EMAIL_FROM=Chatbot <noreply@kingdomcitizen.app>   // must be a verified domain/sender
+ * Option A — SendGrid API:
+ *   SENDGRID_API_KEY=SG.xxx
+ *   EMAIL_FROM=KC Chatbot <noreply@kingdomcitizen.app>  // verified sender/domain
  *   SUPPORT_TO_EMAIL=techsupport@kingdomcitizen.app
  *
- * Option B — SMTP (Google Workspace, Microsoft 365, Zoho, cPanel, etc.):
- *   SMTP_HOST=smtp.example.com
+ * Option B — Resend:
+ *   RESEND_API_KEY=re_xxx
+ *   EMAIL_FROM=...
+ *   SUPPORT_TO_EMAIL=techsupport@kingdomcitizen.app
+ *
+ * Option C — SMTP (SendGrid: smtp.sendgrid.net, user=apikey, pass=API key):
+ *   SMTP_HOST=smtp.sendgrid.net
  *   SMTP_PORT=587
- *   SMTP_USER=...
- *   SMTP_PASS=...
- *   EMAIL_FROM=Chatbot <noreply@kingdomcitizen.app>
+ *   SMTP_USER=apikey
+ *   SMTP_PASS=<SendGrid API key>
+ *   EMAIL_FROM=...
  *   SUPPORT_TO_EMAIL=techsupport@kingdomcitizen.app
  *
  * DRY_RUN=true logs instead of sending.
@@ -54,6 +59,10 @@ export async function sendSupportEmail(payload) {
     return { dryRun: true, to, subject };
   }
 
+  if (process.env.SENDGRID_API_KEY) {
+    return sendViaSendGrid({ to, from, subject, text, replyTo });
+  }
+
   if (process.env.RESEND_API_KEY) {
     return sendViaResend({ to, from, subject, text, replyTo });
   }
@@ -63,15 +72,65 @@ export async function sendSupportEmail(payload) {
   }
 
   throw new Error(
-    "Email is not configured. Set RESEND_API_KEY + EMAIL_FROM, or SMTP_HOST/SMTP_USER/SMTP_PASS + EMAIL_FROM on Render."
+    "Email is not configured. Set SENDGRID_API_KEY + EMAIL_FROM, RESEND_API_KEY, or SMTP_* on Render."
   );
 }
 
 export function isEmailConfigured() {
+  if (process.env.SENDGRID_API_KEY) return true;
   if (process.env.RESEND_API_KEY) return true;
   return Boolean(
     process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
   );
+}
+
+/**
+ * @param {string} from
+ * @returns {{ email: string, name?: string }}
+ */
+function parseFrom(from) {
+  const match = String(from).match(/^(.*)<([^>]+)>$/);
+  if (match) {
+    const name = match[1].trim().replace(/^"|"$/g, "");
+    const email = match[2].trim();
+    return name ? { email, name } : { email };
+  }
+  return { email: String(from).trim() };
+}
+
+/**
+ * @param {{ to: string, from: string, subject: string, text: string, replyTo?: string }} opts
+ */
+async function sendViaSendGrid(opts) {
+  const from = parseFrom(opts.from);
+  /** @type {Record<string, unknown>} */
+  const body = {
+    personalizations: [{ to: [{ email: opts.to }] }],
+    from,
+    subject: opts.subject,
+    content: [{ type: "text/plain", value: opts.text }],
+  };
+
+  if (opts.replyTo) {
+    body.reply_to = { email: opts.replyTo };
+  }
+
+  const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`SendGrid failed (${response.status}): ${errText}`);
+  }
+
+  const messageId = response.headers.get("x-message-id") || undefined;
+  return { provider: "sendgrid", id: messageId, to: opts.to };
 }
 
 /**
